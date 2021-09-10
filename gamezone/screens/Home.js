@@ -1,17 +1,24 @@
 import React, { useState } from "react";
 import {
+  StyleSheet,
   View,
   Text,
   FlatList,
   TouchableOpacity,
   ImageBackground,
+  Modal,
+  TouchableWithoutFeedback,
+  Keyboard,
 } from "react-native";
 import Card from "../shared/Card";
+import { MaterialIcons } from "@expo/vector-icons";
+import ReviewForm from "./ReviewForm";
 
 // Global Styles Import
 import { globalStyles } from "../styles/Global";
 
 export default function Home({ navigation }) {
+  const [modalOpen, setModalOpen] = useState(false);
   const [reviews, setReviews] = useState([
     {
       title: "Zelda, Breath of Fresh Air",
@@ -33,11 +40,40 @@ export default function Home({ navigation }) {
     },
   ]);
 
+  const addReview = (review) => {
+    review.key = Math.random().toString();
+    setReviews((prevReviews) => {
+      return [review, ...prevReviews];
+    });
+    setModalOpen(false);
+  };
+
   return (
     <ImageBackground
       source={require("../assets/game_bg.png")}
       style={globalStyles.container}
     >
+      <Modal visible={modalOpen} animationType="slide">
+        <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+          <View style={styles.modalContent}>
+            <MaterialIcons
+              style={{ ...styles.modalToggle, ...styles.modalClose }}
+              name="close"
+              size={24}
+              onPress={() => setModalOpen(false)}
+            />
+            <ReviewForm addReview={addReview} />
+          </View>
+        </TouchableWithoutFeedback>
+      </Modal>
+
+      <MaterialIcons
+        style={styles.modalToggle}
+        name="add"
+        size={24}
+        onPress={() => setModalOpen(true)}
+      />
+
       <FlatList
         data={reviews}
         renderItem={({ item }) => (
@@ -53,3 +89,22 @@ export default function Home({ navigation }) {
     </ImageBackground>
   );
 }
+
+const styles = StyleSheet.create({
+  modalContent: {
+    flex: 1,
+  },
+  modalToggle: {
+    marginBottom: 10,
+    borderColor: 1,
+    borderColor: "#f2f2f2",
+    padding: 10,
+    borderRadius: 10,
+    alignSelf: "center",
+  },
+  modalClose: {
+    marginTop: 20,
+    marginRight: 10,
+    alignSelf: "flex-end",
+  },
+});
